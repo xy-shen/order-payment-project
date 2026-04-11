@@ -1,6 +1,6 @@
 package com.example.payment_service.controller;
 
-import com.example.payment_service.PaymentStatus;
+import com.example.payment_service.util.PaymentStatus;
 import com.example.payment_service.entity.Payment;
 import com.example.payment_service.service.PaymentService;
 import java.util.List;

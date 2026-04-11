@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/payment_db
+    username: postgres
+    password: password
+
+  security:
+    user:
+      name: user
+      password: password
+
+  docker:
+    compose:
+      enabled: false

@@ -1,6 +1,6 @@
 package com.example.payment_service.service;
 
-import com.example.payment_service.PaymentStatus;
+import com.example.payment_service.util.PaymentStatus;
 import com.example.payment_service.entity.Payment;
 import com.example.payment_service.repository.PaymentRepo;
 import java.util.List;
@@ -17,7 +17,8 @@ public class PaymentService {
     }
 
     public Payment findById(Long id) {
-        return paymentRepo.findById(id);
+        return paymentRepo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Not found"));
     }
 
     public List<Payment> findAll() {
@@ -25,6 +26,10 @@ public class PaymentService {
     }
 
     public Payment updateById(Long id, PaymentStatus status) {
-        return paymentRepo.updateById(id, status);
+        Payment payment = paymentRepo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Payment Not found"));
+
+        payment.setStatus(status);
+        return paymentRepo.save(payment);
     }
 }
