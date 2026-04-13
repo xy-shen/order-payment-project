@@ -1,0 +1,9 @@
+spring:
+  security:
+    user:
+      name: user
+      password: password
+
+  docker:
+    compose:
+      enabled: false
