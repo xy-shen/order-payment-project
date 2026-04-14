@@ -1,5 +1,6 @@
 package com.example.order_service.controller;
 
+import com.example.order_service.dto.CreateOrderRequest;
 import com.example.order_service.entity.Order;
 import com.example.order_service.service.OrderService;
 import com.example.order_service.util.OrderStatus;
@@ -20,8 +21,8 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public Order create(@RequestBody Order order) {
-        return orderService.create(order);
+    public Order create(@RequestBody CreateOrderRequest request) {
+        return orderService.create(request);
     }
 
     @GetMapping("/{id}")

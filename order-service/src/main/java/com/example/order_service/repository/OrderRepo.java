@@ -2,7 +2,8 @@ package com.example.order_service.repository;
 
 import com.example.order_service.entity.Order;
 import com.example.order_service.util.OrderStatus;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.*;
 import org.springframework.data.mongodb.core.query.*;
@@ -17,14 +18,9 @@ public class OrderRepo {
         return mongoTemplate.insert(order);
     }
 
-    public Order findById(String id) {
+    public Optional<Order> findById(String id) {
         Query query = new Query(Criteria.where("_id").is(id));
-        Order order = mongoTemplate.findOne(query, Order.class);
-
-        if (order == null) {
-            throw new RuntimeException("Order not found");
-        }
-        return order;
+        return Optional.ofNullable(mongoTemplate.findOne(query, Order.class));
     }
 
     public List<Order> findAll() {
@@ -33,7 +29,10 @@ public class OrderRepo {
 
     public Order updateById(String id, OrderStatus status) {
         Query query = new Query(Criteria.where("_id").is(id));
-        Update update = new Update().set("status", status);
+
+        Update update = new Update()
+            .set("status", status)
+            .set("updatedAt", LocalDateTime.now()); // 🔥 fix
 
         return mongoTemplate.findAndModify(
             query,
