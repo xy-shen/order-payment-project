@@ -1,0 +1,2 @@
+events/PaymentCompletedEvent.class
+events/OrderCreatedEvent.class

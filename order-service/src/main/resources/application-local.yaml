@@ -4,6 +4,11 @@ spring:
       name: user
       password: password
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      auto-startup: false
+
   data:
     mongodb:
       uri: mongodb://localhost:27017/order_db

@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class PaymentController {
     private final PaymentService paymentService;
 
-    @PostMapping
-    public Payment create(@RequestBody Payment payment) {
-        return paymentService.create(payment);
-    }
+//    @PostMapping
+//    public Payment create(@RequestBody Payment payment) {
+//        return paymentService.create(payment);
+//    }
 
     @GetMapping("/{id}")
     public Payment findById(@RequestParam Long id) {

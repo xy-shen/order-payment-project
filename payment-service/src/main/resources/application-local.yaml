@@ -9,6 +9,11 @@ spring:
       name: user
       password: password
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      auto-startup: false
+
   docker:
     compose:
       enabled: false

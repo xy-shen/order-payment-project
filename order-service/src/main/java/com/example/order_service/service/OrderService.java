@@ -7,13 +7,13 @@ import com.example.order_service.util.OrderStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
 public class OrderService {
     private final OrderRepo orderRepo;
+    private final OrderEventProducer orderEventProducer;
 
     public Order create(CreateOrderRequest request) {
         Order order = new Order();
@@ -26,7 +26,10 @@ public class OrderService {
 
         order.setId(null);
 
-        return orderRepo.create(order);
+        Order saved = orderRepo.create(order);
+
+        orderEventProducer.sendOrderCreatedEvent(saved);
+        return saved;
     }
 
     public Order findById(String id) {
