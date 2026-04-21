@@ -4,12 +4,14 @@ import com.example.order_service.entity.Order;
 import events.OrderCreatedEvent;
 import java.util.*;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
 public class OrderEventProducer {
+    @Autowired
     private final KafkaTemplate<String, OrderCreatedEvent> kafkaTemplate;
 
     public void sendOrderCreatedEvent(Order order) {
