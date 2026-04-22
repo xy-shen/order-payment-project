@@ -3,6 +3,10 @@ spring:
     compose:
       enabled: true
 
+  data:
+    mongodb:
+      uri: mongodb://mongo:27017/order_db
+
   kafka:
     bootstrap-servers: kafka:9092
 
