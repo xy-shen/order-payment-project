@@ -21,8 +21,14 @@ public class PaymentResultConsumer {
     }
 
     private OrderStatus mapStatus(String status) {
-        return "SUCCESS".equals(status)
-            ? OrderStatus.CONFIRMED
-            : OrderStatus.PENDING_PAYMENT;
+        if ("SUCCESS".equals(status)) {
+            return OrderStatus.CONFIRMED;
+        }
+
+        if ("CANCELLED".equals(status)) {
+            return OrderStatus.CANCELLED;
+        }
+
+        return OrderStatus.PENDING_PAYMENT;
     }
 }

@@ -1,2 +1,3 @@
+/Users/shenxinyi/Projects/final-project/common/src/main/java/events/OrderCancelledEvent.java
 /Users/shenxinyi/Projects/final-project/common/src/main/java/events/OrderCreatedEvent.java
 /Users/shenxinyi/Projects/final-project/common/src/main/java/events/PaymentCompletedEvent.java

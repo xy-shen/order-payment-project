@@ -43,6 +43,22 @@ public class OrderService {
     }
 
     public Order updateById(String id, OrderStatus status) {
-        return orderRepo.updateById(id, status);
+        Order existingOrder = findById(id);
+        // not changed
+        if (existingOrder.getStatus() == status) {
+            return existingOrder;
+        }
+
+        Order updatedOrder = orderRepo.updateById(id, status);
+        if (updatedOrder == null) {
+            throw new RuntimeException("Not found");
+        }
+
+        // cancel payment
+        if (status == OrderStatus.CANCELLED) {
+            orderEventProducer.sendOrderCancelledEvent(updatedOrder);
+        }
+
+        return updatedOrder;
     }
 }

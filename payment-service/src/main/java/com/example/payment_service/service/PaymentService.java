@@ -25,16 +25,29 @@ public class PaymentService {
     }
 
     public Payment updateById(Long id, PaymentStatus status) {
-        Payment payment = paymentRepo.findById(id)
+        Payment payment = findById(id);
+        return updatePaymentStatus(payment, status, true);
+    }
+
+    public Payment cancelByOrderId(String orderId) {
+        Payment payment = paymentRepo.findByOrderId(orderId)
             .orElseThrow(() -> new RuntimeException("Payment Not found"));
 
+        return updatePaymentStatus(payment, PaymentStatus.CANCELLED, false);
+    }
+
+    private Payment updatePaymentStatus(Payment payment, PaymentStatus status, boolean publishEvent) {
         if (payment.getStatus() == status) {
             return payment;
         }
 
         payment.setStatus(status);
         Payment updatedPayment = paymentRepo.save(payment);
-        paymentEventProducer.sendPaymentCompletedEvent(updatedPayment);
+
+        if (publishEvent) {
+            paymentEventProducer.sendPaymentCompletedEvent(updatedPayment);
+        }
+
         return updatedPayment;
     }
 

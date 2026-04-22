@@ -1,2 +1,3 @@
 events/PaymentCompletedEvent.class
 events/OrderCreatedEvent.class
+events/OrderCancelledEvent.class

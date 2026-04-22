@@ -1,6 +1,7 @@
 package com.example.payment_service.service;
 
 import com.example.payment_service.entity.Payment;
+import events.OrderCancelledEvent;
 import events.OrderCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -25,5 +26,10 @@ public class PaymentEventConsumer {
 
         // publish result
         paymentEventProducer.sendPaymentCompletedEvent(payment);
+    }
+
+    @KafkaListener(topics = "order.cancelled", groupId = "payment-group")
+    public void consume(OrderCancelledEvent event) {
+        paymentService.cancelByOrderId(event.getOrderId());
     }
 }
