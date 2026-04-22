@@ -1,0 +1,207 @@
+<main class="page-shell">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Angular Frontend</p>
+      <h1>Final Project API Console</h1>
+      <p class="subtitle">
+        Minimal frontend for manual testing of order and payment APIs.
+      </p>
+    </div>
+  </header>
+
+  <section *ngIf="errorMessage()" class="message error">
+    {{ errorMessage() }}
+  </section>
+
+  <section class="grid">
+    <article class="panel">
+      <h2>Orders</h2>
+
+      <div class="stack">
+        <section class="control-group">
+          <div class="section-heading">
+            <h3>All orders</h3>
+            <button type="button" (click)="fetchOrders()">Fetch Orders</button>
+          </div>
+          <p class="muted" *ngIf="!ordersFetched()">
+            Click "Fetch Orders" to load orders.
+          </p>
+          <p class="muted" *ngIf="loadingOrders()">
+            Loading orders...
+          </p>
+          <p class="muted" *ngIf="ordersFetched() && !loadingOrders() && orders().length === 0">
+            No orders found.
+          </p>
+          <p class="muted" *ngIf="ordersFetched() && !loadingOrders() && orders().length > 0">
+            {{ ordersCountLabel() }}
+          </p>
+          <div class="list" *ngIf="ordersFetched() && !loadingOrders() && orders().length > 0">
+            <button
+              type="button"
+              class="list-item"
+              *ngFor="let order of orders()"
+              (click)="selectOrder(order)"
+            >
+              <span>{{ order.id }}</span>
+              <strong>{{ order.status }}</strong>
+              <span>${{ order.amount }}</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="control-group">
+          <h3>Create order</h3>
+          <label>
+            Amount
+            <input type="number" min="1" [(ngModel)]="createOrderAmount" />
+          </label>
+          <button type="button" (click)="createOrder()">Create</button>
+        </section>
+
+        <section class="control-group">
+          <h3>Find order by id</h3>
+          <label>
+            Order id
+            <input type="text" [(ngModel)]="orderSearchId" placeholder="Mongo id" />
+          </label>
+          <button type="button" (click)="findOrderById()">Find</button>
+          <div class="result-card" *ngIf="selectedOrder()">
+            <strong>Find result</strong>
+            <dl class="details compact-details">
+              <div><dt>Id</dt><dd>{{ selectedOrder()!.id }}</dd></div>
+              <div><dt>Amount</dt><dd>${{ selectedOrder()!.amount }}</dd></div>
+              <div><dt>Status</dt><dd>{{ selectedOrder()!.status }}</dd></div>
+              <div><dt>Created</dt><dd>{{ selectedOrder()!.createdAt | date: 'medium' }}</dd></div>
+              <div><dt>Updated</dt><dd>{{ selectedOrder()!.updatedAt | date: 'medium' }}</dd></div>
+            </dl>
+          </div>
+        </section>
+
+        <section class="control-group">
+          <h3>Update order status</h3>
+          <label>
+            Order id
+            <input type="text" [(ngModel)]="orderStatusUpdateId" placeholder="Mongo id" />
+          </label>
+          <label>
+            Status
+            <select [(ngModel)]="selectedOrderStatus">
+              <option *ngFor="let status of orderStatuses" [ngValue]="status">{{ status }}</option>
+            </select>
+          </label>
+          <button type="button" (click)="updateOrderStatus()">Update</button>
+        </section>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h2>Payments</h2>
+
+      <div class="stack">
+        <section class="control-group">
+          <div class="section-heading">
+            <h3>All payments</h3>
+            <button type="button" (click)="fetchPayments()">Fetch Payments</button>
+          </div>
+          <p class="muted" *ngIf="!paymentsFetched()">
+            Click "Fetch Payments" to load payments.
+          </p>
+          <p class="muted" *ngIf="loadingPayments()">
+            Loading payments...
+          </p>
+          <p class="muted" *ngIf="paymentsFetched() && !loadingPayments() && payments().length === 0">
+            No payments found.
+          </p>
+          <p class="muted" *ngIf="paymentsFetched() && !loadingPayments() && payments().length > 0">
+            {{ paymentsCountLabel() }}
+          </p>
+          <div class="list" *ngIf="paymentsFetched() && !loadingPayments() && payments().length > 0">
+            <button
+              type="button"
+              class="list-item"
+              *ngFor="let payment of payments()"
+              (click)="selectPayment(payment)"
+            >
+              <span>#{{ payment.id }}</span>
+              <strong>{{ payment.status }}</strong>
+              <span>order {{ payment.orderId }}</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="control-group">
+          <h3>Find payment by id</h3>
+          <label>
+            Payment id
+            <input type="number" min="1" [(ngModel)]="paymentSearchId" placeholder="Numeric id" />
+          </label>
+          <button type="button" (click)="findPaymentById()">Find</button>
+          <div class="result-card" *ngIf="selectedPayment()">
+            <strong>Find result</strong>
+            <dl class="details compact-details">
+              <div><dt>Id</dt><dd>{{ selectedPayment()!.id }}</dd></div>
+              <div><dt>Order Id</dt><dd>{{ selectedPayment()!.orderId }}</dd></div>
+              <div><dt>Amount</dt><dd>${{ selectedPayment()!.amount }}</dd></div>
+              <div><dt>Status</dt><dd>{{ selectedPayment()!.status }}</dd></div>
+              <div><dt>Event Id</dt><dd>{{ selectedPayment()!.eventId }}</dd></div>
+            </dl>
+          </div>
+        </section>
+
+        <section class="control-group">
+          <h3>Update payment status</h3>
+          <label>
+            Payment id
+            <input type="number" min="1" [(ngModel)]="paymentStatusUpdateId" placeholder="Numeric id" />
+          </label>
+          <label>
+            Status
+            <select [(ngModel)]="selectedPaymentStatus">
+              <option *ngFor="let status of paymentStatuses" [ngValue]="status">{{ status }}</option>
+            </select>
+          </label>
+          <button type="button" (click)="updatePaymentStatus()">Update</button>
+        </section>
+      </div>
+    </article>
+  </section>
+
+  <section class="grid details-grid">
+    <article class="panel">
+      <h2>Selected Order</h2>
+      <div *ngIf="selectedOrder(); else emptyOrder">
+        <dl class="details">
+          <div><dt>Id</dt><dd>{{ selectedOrder()!.id }}</dd></div>
+          <div><dt>Amount</dt><dd>${{ selectedOrder()!.amount }}</dd></div>
+          <div><dt>Status</dt><dd>{{ selectedOrder()!.status }}</dd></div>
+          <div><dt>Created</dt><dd>{{ selectedOrder()!.createdAt | date: 'medium' }}</dd></div>
+          <div><dt>Updated</dt><dd>{{ selectedOrder()!.updatedAt | date: 'medium' }}</dd></div>
+        </dl>
+      </div>
+      <ng-template #emptyOrder>
+        <p class="muted">Select an order from the list or search by id.</p>
+      </ng-template>
+    </article>
+
+    <article class="panel">
+      <h2>Selected Payment</h2>
+      <div *ngIf="selectedPayment(); else emptyPayment">
+        <dl class="details">
+          <div><dt>Id</dt><dd>{{ selectedPayment()!.id }}</dd></div>
+          <div><dt>Order Id</dt><dd>{{ selectedPayment()!.orderId }}</dd></div>
+          <div><dt>Amount</dt><dd>${{ selectedPayment()!.amount }}</dd></div>
+          <div><dt>Status</dt><dd>{{ selectedPayment()!.status }}</dd></div>
+          <div><dt>Event Id</dt><dd>{{ selectedPayment()!.eventId }}</dd></div>
+        </dl>
+      </div>
+      <ng-template #emptyPayment>
+        <p class="muted">Select a payment from the list or search by id.</p>
+      </ng-template>
+    </article>
+  </section>
+
+  <section class="panel">
+    <h2>Last API Result</h2>
+    <pre>{{ lastResult() | json }}</pre>
+  </section>
+</main>
