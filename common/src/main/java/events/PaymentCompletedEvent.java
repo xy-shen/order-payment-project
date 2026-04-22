@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class PaymentCompletedEvent {
     private String eventId;
     private String orderId;
-    private String status; // SUCCESS / FAILED
+    private String status; // SUCCESS / FAILED / PENDING
 }

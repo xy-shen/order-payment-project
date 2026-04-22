@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 public class PaymentService {
 
     private final PaymentRepo paymentRepo;
-
-//    public Payment create(Payment payment) {
-//        return paymentRepo.save(payment);
-//    }
+    private final PaymentEventProducer paymentEventProducer;
 
     public Payment findById(Long id) {
         return paymentRepo.findById(id)
@@ -31,8 +28,14 @@ public class PaymentService {
         Payment payment = paymentRepo.findById(id)
             .orElseThrow(() -> new RuntimeException("Payment Not found"));
 
+        if (payment.getStatus() == status) {
+            return payment;
+        }
+
         payment.setStatus(status);
-        return paymentRepo.save(payment);
+        Payment updatedPayment = paymentRepo.save(payment);
+        paymentEventProducer.sendPaymentCompletedEvent(updatedPayment);
+        return updatedPayment;
     }
 
     public boolean alreadyProcessed(String eventId) {
@@ -45,7 +48,7 @@ public class PaymentService {
         payment.setOrderId(event.getOrderId());
         payment.setAmount(event.getAmount());
         payment.setEventId(event.getEventId());
-        payment.setStatus(PaymentStatus.SUCCESS);
+        payment.setStatus(PaymentStatus.PENDING);
 
         return paymentRepo.save(payment);
     }

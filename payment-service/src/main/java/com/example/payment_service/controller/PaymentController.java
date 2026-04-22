@@ -20,13 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class PaymentController {
     private final PaymentService paymentService;
 
-//    @PostMapping
-//    public Payment create(@RequestBody Payment payment) {
-//        return paymentService.create(payment);
-//    }
-
     @GetMapping("/{id}")
-    public Payment findById(@RequestParam Long id) {
+    public Payment findById(@PathVariable Long id) {
         return paymentService.findById(id);
     }
 
@@ -36,7 +31,7 @@ public class PaymentController {
     }
 
     @PatchMapping("/{id}")
-    public Payment updateById(@RequestParam Long id, @PathVariable PaymentStatus status) {
+    public Payment updateById(@PathVariable Long id, @RequestBody PaymentStatus status) {
         return paymentService.updateById(id, status);
     }
 }
