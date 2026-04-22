@@ -2,6 +2,7 @@ package com.example.order_service.service;
 
 import com.example.order_service.dto.CreateOrderRequest;
 import com.example.order_service.entity.Order;
+import com.example.order_service.exception.OrderNotFoundException;
 import com.example.order_service.repository.OrderRepo;
 import com.example.order_service.util.OrderStatus;
 import java.time.LocalDateTime;
@@ -34,7 +35,7 @@ public class OrderService {
 
     public Order findById(String id) {
         return orderRepo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Not found"));
+            .orElseThrow(() -> new OrderNotFoundException(id));
     }
 
 
@@ -51,7 +52,7 @@ public class OrderService {
 
         Order updatedOrder = orderRepo.updateById(id, status);
         if (updatedOrder == null) {
-            throw new RuntimeException("Not found");
+            throw new OrderNotFoundException(id);
         }
 
         // cancel payment

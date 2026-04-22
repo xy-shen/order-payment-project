@@ -2,6 +2,7 @@ package com.example.payment_service.service;
 
 import com.example.payment_service.util.PaymentStatus;
 import com.example.payment_service.entity.Payment;
+import com.example.payment_service.exception.PaymentNotFoundException;
 import com.example.payment_service.repository.PaymentRepo;
 import events.OrderCreatedEvent;
 import java.util.List;
@@ -17,7 +18,7 @@ public class PaymentService {
 
     public Payment findById(Long id) {
         return paymentRepo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Not found"));
+            .orElseThrow(() -> new PaymentNotFoundException(id));
     }
 
     public List<Payment> findAll() {
@@ -31,7 +32,7 @@ public class PaymentService {
 
     public Payment cancelByOrderId(String orderId) {
         Payment payment = paymentRepo.findByOrderId(orderId)
-            .orElseThrow(() -> new RuntimeException("Payment Not found"));
+            .orElseThrow(() -> new PaymentNotFoundException(orderId));
 
         return updatePaymentStatus(payment, PaymentStatus.CANCELLED, false);
     }
