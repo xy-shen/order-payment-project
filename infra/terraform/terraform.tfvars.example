@@ -1,0 +1,17 @@
+aws_region              = "us-west-2"
+project_name            = "final-project"
+environment             = "dev"
+availability_zone_count = 1
+
+ec2_instance_type     = "t3.micro"
+ec2_root_volume_size  = 16
+app_ingress_ports     = [80, 8081, 8082]
+app_ingress_cidrs     = ["0.0.0.0/0"]
+ssh_ingress_cidrs     = ["0.0.0.0/0"]
+
+frontend_bucket_force_destroy = false
+frontend_price_class          = "PriceClass_100"
+
+tags = {
+  Owner = "your-name"
+}
