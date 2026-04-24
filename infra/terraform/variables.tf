@@ -22,65 +22,60 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "availability_zone_count" {
-  description = "Number of availability zones to use."
+variable "eks_public_access_cidrs" {
+  description = "CIDR blocks allowed to access the public EKS API endpoint."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "eks_node_instance_types" {
+  description = "EC2 instance types for the EKS managed node group."
+  type        = list(string)
+  default     = ["t3.medium"]
+}
+
+variable "eks_node_disk_size" {
+  description = "Disk size in GiB for each EKS worker node."
+  type        = number
+  default     = 20
+}
+
+variable "eks_node_desired_size" {
+  description = "Desired number of EKS worker nodes."
   type        = number
   default     = 1
-
-  validation {
-    condition     = var.availability_zone_count >= 1 && var.availability_zone_count <= 2
-    error_message = "availability_zone_count must be between 1 and 2."
-  }
 }
 
-variable "ec2_instance_type" {
-  description = "EC2 instance type for the ECS host."
-  type        = string
-  default     = "t3.micro"
-}
-
-variable "ec2_root_volume_size" {
-  description = "Root EBS volume size in GiB for the ECS host."
+variable "eks_node_min_size" {
+  description = "Minimum number of EKS worker nodes."
   type        = number
-  default     = 32
+  default     = 1
 }
 
-variable "app_ingress_ports" {
-  description = "Public TCP ports to open on the ECS host for demo applications."
-  type        = list(number)
-  default     = [80, 8081, 8082]
+variable "eks_node_max_size" {
+  description = "Maximum number of EKS worker nodes."
+  type        = number
+  default     = 1
 }
 
-variable "app_ingress_cidrs" {
-  description = "CIDR blocks allowed to access demo application ports."
+variable "eks_enabled_cluster_log_types" {
+  description = "EKS control-plane log types to send to CloudWatch."
   type        = list(string)
-  default     = ["0.0.0.0/0"]
-}
-
-variable "ssh_ingress_cidrs" {
-  description = "CIDR blocks allowed to SSH into the ECS host."
-  type        = list(string)
-  default     = ["0.0.0.0/0"]
-}
-
-variable "frontend_bucket_force_destroy" {
-  description = "Whether to allow Terraform to delete the frontend bucket even if it contains files."
-  type        = bool
-  default     = false
-}
-
-variable "frontend_price_class" {
-  description = "CloudFront price class for the frontend distribution."
-  type        = string
-  default     = "PriceClass_100"
+  default     = ["api", "audit", "authenticator"]
 
   validation {
-    condition = contains(
-      ["PriceClass_100", "PriceClass_200", "PriceClass_All"],
-      var.frontend_price_class
-    )
-    error_message = "frontend_price_class must be PriceClass_100, PriceClass_200, or PriceClass_All."
+    condition = alltrue([
+      for log_type in var.eks_enabled_cluster_log_types :
+      contains(["api", "audit", "authenticator", "controllerManager", "scheduler"], log_type)
+    ])
+    error_message = "eks_enabled_cluster_log_types contains an unsupported log type."
   }
+}
+
+variable "cloudwatch_log_retention_days" {
+  description = "Retention period in days for CloudWatch log groups."
+  type        = number
+  default     = 7
 }
 
 variable "tags" {

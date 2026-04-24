@@ -1,47 +1,55 @@
 # Terraform AWS Foundation
 
-This folder provisions a low-cost AWS foundation for this demo project:
+This folder provisions a minimal EKS-based AWS foundation for this demo project:
 
-- VPC with public and private subnets
-- Internet gateway and route tables
-- ECR repositories for `order-service` and `payment-service`
-- ECS cluster
-- One ECS-optimized EC2 host instance
-- S3 bucket for Angular frontend build artifacts
-- CloudFront distribution for frontend delivery
+- VPC with the minimum public subnets EKS requires
+- Internet gateway and public route table
+- EKS cluster
+- One managed node group
+- ECR repositories for `order-service`, `payment-service`, and `frontend`
+- CloudWatch log group for EKS control-plane logs
 
-## Why ECS Instead Of EKS
+## Why This Is "Minimal"
 
-This project is a demo with minimal load, so cost matters more than Kubernetes features right now.
+This setup intentionally favors fewer moving parts over production hardening:
 
-AWS currently documents:
+- public subnets only
+- public EKS API endpoint
+- one small managed node group by default
+- no NAT gateway
+- no private worker nodes
 
-- Amazon EKS standard-support clusters cost `$0.10/hour` per cluster
-- Amazon ECS with the EC2 launch type has no additional ECS charge beyond the EC2 resources you run
+That keeps the Terraform simpler and cheaper, but it is not a production-grade Kubernetes platform.
 
-Sources:
+## Cost Reality
 
-- [Amazon EKS pricing](https://aws.amazon.com/eks/pricing/)
-- [Amazon ECS pricing](https://aws.amazon.com/ecs/pricing/)
+This is the smallest practical EKS foundation for this repo, but it is still not a true free-tier setup.
 
-Because of that, this Terraform now uses `ECS + one small EC2 instance` instead of EKS.
+Main reasons:
+
+- EKS has a control-plane charge per cluster
+- worker nodes are billed as EC2 instances
+- EBS storage and data transfer may also add cost
+
+If your main goal is to stay as close to free-tier as possible, ECS is usually the cheaper AWS path for this project.
 
 ## Defaults
 
-The defaults are tuned for low cost:
+The defaults are intentionally conservative:
 
-- `1` availability zone
-- `t3.micro` ECS host
-- one public EC2 instance instead of a NAT-backed private cluster
-- static frontend on S3 + CloudFront
+- `2` public subnets because EKS requires subnets in at least two AZs
+- `1` managed node by default
+- `t3.medium` worker node type
+- `7` day CloudWatch retention for control-plane logs
 
 ## Assumptions
 
 - AWS is the target cloud provider.
 - This is a development/demo-oriented setup, not a production-hardened platform.
 - Terraform state is local for now. Move state to an S3 backend with locking before team use.
-- The frontend is hosted as static files on S3 behind CloudFront.
-- Backend containers will be pushed to ECR and then run on the ECS host later.
+- You will build and push application images to ECR before applying the Kubernetes manifests.
+- CloudWatch is enabled for EKS control-plane logs. Application pod logs will still need a log collector if you want them in CloudWatch too.
+- The Kubernetes manifests in `/k8s` are the application layer that runs on top of this infrastructure.
 
 ## Files
 
@@ -53,7 +61,7 @@ The defaults are tuned for low cost:
 
 ## Usage
 
-1. Install Terraform and configure AWS credentials.
+1. Install Terraform, AWS CLI, `kubectl`, and configure AWS credentials.
 2. Copy the example vars file:
 
 ```bash
@@ -74,45 +82,39 @@ terraform plan
 terraform apply
 ```
 
+6. Configure local `kubectl` access:
+
+```bash
+aws eks update-kubeconfig --region <aws-region> --name <cluster-name>
+```
+
+7. Build and push the application images to the ECR repositories from Terraform output.
+8. Apply the Kubernetes manifests from the project root:
+
+```bash
+kubectl apply -f k8s/app.yaml
+```
+
 ## What You Get After Apply
 
 Terraform outputs:
 
-- ECS cluster name
-- ECS host EC2 instance id
-- ECS host public IP
-- ECR repository URLs for both backend services
-- frontend S3 bucket name
-- frontend CloudFront domain and URL
-
-## Frontend Deploy Flow
-
-The Angular source stays in `frontend/`, but the built files should be uploaded to the Terraform-managed S3 bucket after `npm run build`.
-
-Typical flow:
-
-```bash
-cd frontend
-npm install
-npm run build
-```
-
-Then upload the generated `dist` output to the S3 bucket from Terraform output.
-
-## Backend Deploy Direction
-
-This Terraform creates the base ECS cluster and one ECS-capable EC2 host, but it does not yet define ECS task definitions or services for `order-service` and `payment-service`.
-
-That is intentional so we can keep the infrastructure cheap and simple first.
+- EKS cluster name
+- EKS API endpoint
+- managed node group name
+- CloudWatch log group name
+- VPC id
+- public subnet ids
+- ECR repository URLs for all three app images
 
 ## Important Note
 
-The current frontend uses local Angular proxy paths for development. Before production deployment, you will likely want to add environment-based API URLs so the built frontend can call your AWS-hosted backend services directly instead of relying on the local dev proxy.
+EKS still requires subnets in at least two availability zones, so this Terraform keeps exactly that minimum even for a demo setup.
 
 ## Next Good Steps
 
-- Add an S3 backend and state locking
-- Add ECS task definitions and services for the backend containers
-- Add a deployment step that uploads Angular build artifacts to the frontend bucket
-- Add a reverse proxy or load balancer only if the demo needs a cleaner public entrypoint
-- Replace direct public-instance access with a more production-like topology later if needed
+- Push all three app images to ECR and update the Kubernetes image references
+- Add a CloudWatch log collector for pod logs if you want application logs in CloudWatch
+- Add resource requests and limits to the Kubernetes manifests
+- Add readiness and liveness probes
+- Move Terraform state to an S3 backend with locking
